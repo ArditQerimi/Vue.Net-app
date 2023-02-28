@@ -14,10 +14,7 @@ export default {
       type: Array,
       required: true,
     },
-    onSubmit: {
-      type: Function,
-      required: true,
-    },
+
     editItem: {
       type: Function,
       required: true,

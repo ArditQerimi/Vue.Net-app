@@ -2,16 +2,13 @@
 import axios from "axios";
 import TableComponent from "@/components/TableComponent.vue";
 import ProductsTableRow from "@/views/ProductsView/ProductsTableRow.vue";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   components: { ProductsTableRow, TableComponent },
   data() {
     return {
       ProductsTableRow,
-      products: [],
-      categories: [],
-      sizes: [],
-      colors: [],
       form: {
         id: null,
         name: "",
@@ -29,85 +26,57 @@ export default {
       inline: null,
     };
   },
-
+  created() {
+    this.$store.dispatch("products/fetchProducts");
+    this.$store.dispatch("products/fetchCategories");
+    this.$store.dispatch("products/fetchColors");
+    this.$store.dispatch("products/fetchSizes");
+  },
   methods: {
-    async submitForm() {
-      try {
-        const foundedCategory = this.categories.find(
-          (category) => category.name === this.selectedCategory
-        );
-        const foundedSize = this.sizes.find(
-          (size) => size.sizeType === this.selectedSizeType.toLowerCase()
-        );
-
-        const foundedColors = this.colors.filter((color) =>
-          this.selectedColors.includes(color.name)
-        );
-
-        const foundedColorsIds = foundedColors.map((color) => color.id);
-        const newForm = {
-          ...this.form,
-          categoryId: foundedCategory.id,
-          sizeId: foundedSize.id,
-          colorIds: foundedColorsIds,
-        };
-        let response;
-        if (this.form.id !== null) {
-          response = await axios.put(
-            `http://localhost:5000/api/Products/UpdateProduct`,
-            newForm
-          );
-        } else {
-          response = await axios.post(
-            "http://localhost:5000/api/Products/CreateOneProduct",
-            newForm
-          );
-        }
-
-        const updatedProduct = response.data;
-        const productIndex = this.products.findIndex(
-          (p) => p.id === updatedProduct.id
-        );
-
-        if (productIndex !== -1) {
-          this.products[productIndex] = updatedProduct;
-          this.clearForm();
-        } else {
-          this.products.unshift(updatedProduct);
-          this.clearForm();
-        }
-      } catch (error) {
-        console.error(error);
-      }
+    async saveProduct(actionType) {
+      const foundedCategory = this.categories.find(
+        (category) => category.name === this.selectedCategory
+      );
+      const foundedSize = this.sizes.find(
+        (size) => size.sizeType === this.selectedSizeType.toLowerCase()
+      );
+      const foundedColors = this.colors.filter((color) =>
+        this.selectedColors.includes(color.name)
+      );
+      const foundedColorsIds = foundedColors.map((color) => color.id);
+      const newForm = {
+        ...this.form,
+        categoryId: foundedCategory.id,
+        sizeId: foundedSize.id,
+        colorIds: foundedColorsIds,
+      };
+      this.$store.dispatch(`products/${actionType}`, newForm);
     },
 
-    editItem(id) {
-      const product = this.products?.find((p) => p.id === id);
-      const { name, price, colors, size, category } = product ?? {};
+    async saveAdd() {
+      await this.saveProduct("addProduct");
+    },
+    async saveEdit() {
+      await this.saveProduct("editProduct");
+    },
+
+    editProduct(item) {
+      const { name, price, colors, size, category } = item ?? {};
       const colorIds = colors?.map((color) => color?.id) ?? [];
       const colorNames = colors?.map((color) => color?.name) ?? [];
-
-      this.form.id = product?.id;
+      this.form.id = item?.id;
       this.form.name = name;
       this.form.price = price;
       this.form.colorIds = colorIds;
       this.form.sizeId = size.id;
       this.form.categoryId = category.id;
-
+      debugger;
       this.selectedSizeType = size?.name;
       this.selectedColors = colorNames;
       this.selectedCategory = category?.name;
     },
-    async deleteItem(productId) {
-      try {
-        const deletedItem = await axios.delete(
-          "http://localhost:5000/api/Products/DeleteOneProduct",
-          { data: { id: productId } }
-        );
-        this.products = this.products.filter(
-          (p) => p.id !== deletedItem.data.id
-        );
-      } catch (error) {}
+    async deleteProduct(item) {
+      this.$store.dispatch("products/deleteProduct", item);
     },
     clearForm() {
       this.form = {
@@ -122,8 +91,27 @@ export default {
       this.selectedCategory = "";
       this.selectedColors = [];
     },
+    logInput(event) {
+      console.log(event.target.value);
+    },
+    category(event) {
+      console.log(event.target.value);
+    },
   },
+
   computed: {
+    ...mapState({
+      products: (state) => state.products.products,
+      categories: (state) => state.products.categories,
+      colors: (state) => state.products.colors,
+      sizes: (state) => state.products.sizes,
+      // loading: (state) => state.loading,
+      // error: (state) => state.error,
+    }),
+    // ...mapGetters("products", {
+    //   products: "cartProducts",
+    //   price: "cartTotalPrice",
+    // }),
     sizesName() {
       return this.sizes.map((size) => size.name);
     },
@@ -133,13 +121,6 @@ export default {
     categoriesName() {
       return this.categories.map((category) => category.name);
     },
-    // getProducts() {
-    //   return this.products;
-    // },
-    getSizes() {
-      return this.sizes;
-    },
-    products(value) {},
   },
   watch: {
     selectedSizeType(size) {},
@@ -153,21 +134,6 @@ export default {
   },
   async mounted() {
     try {
-      const products = await axios.get(
-        "http://localhost:5000/api/Products/getAll"
-      );
-      this.products = products.data.reverse();
-      const sizes = await axios.get("http://localhost:5000/api/Size/AllSizes");
-      this.sizes = sizes.data;
-      const colors = await axios.get(
-        "http://localhost:5000/api/Color/AllColors"
-      );
-      this.colors = colors.data;
-
-      const categories = await axios.get(
-        "http://localhost:5000/api/Categories/AllCategories"
-      );
-      this.categories = categories.data;
     } catch (error) {
       console.error(error);
     }
@@ -177,11 +143,12 @@ export default {
 
 <template>
   <div class="form-container">
-    <form @submit.prevent="submitForm">
+    <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()">
       <div>
         <v-text-field
           label="Name:"
           v-model="form.name"
+          @change="logInput"
           type="text"
           variant="solo"
           density="comfortable"
@@ -206,6 +173,7 @@ export default {
           variant="solo"
           v-model="selectedCategory"
           density="comfortable"
+          onchange="category"
         ></v-select>
       </div>
       <div>
@@ -230,32 +198,28 @@ export default {
       </div>
 
       <div style="display: flex; justify-content: flex-end">
-        <button class="submit-btn" type="submit">Submit</button>
+        <button v-if="this.form.id" class="submit-btn" type="submit">
+          Save Edit
+        </button>
+        <button v-if="!this.form.id" class="submit-btn" type="submit">
+          Save Product
+        </button>
       </div>
     </form>
   </div>
 
   <v-container fluid class="spacing-playground pa-6 justify-center">
     <TableComponent
-      :delete-item="deleteItem"
-      :edit-item="editItem"
+      :delete-item="deleteProduct"
+      :edit-item="editProduct"
       :headers="['Category', 'Product', 'Price', 'Colors', 'Size', 'Actions']"
-      :on-submit="submitForm"
       :tableRows="ProductsTableRow"
-      :items="this.products"
+      :items="products"
     ></TableComponent>
   </v-container>
 </template>
 
 <style scoped>
-.v-input__details {
-  padding-inline-start: 6px;
-  padding-inline-end: 6px;
-}
-#styled-input {
-  height: 40px;
-  font-size: 20pt;
-}
 .styled-input label[for] {
   height: 40px;
   font-size: 20pt;
@@ -292,51 +256,11 @@ tr:hover {
 
 .form-container {
   max-width: 500px;
-  /*width: 40%;*/
   margin: 20px auto;
   background-color: #f9f9f9;
   padding: 20px;
   border: 1px solid #dddddd;
   border-radius: 10px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-.form-label {
-  width: 100%;
-}
-
-.form-label-container {
-  width: 50px;
-}
-
-.text-input {
-  padding: 15px 10px;
-  border-radius: 5px;
-  outline: none;
-  border: 1px solid #dddddd;
-  width: 100%;
-}
-
-.number-input {
-  padding: 15px 10px;
-  border-radius: 5px;
-  outline: none;
-  border: 1px solid #dddddd;
-  width: 100%;
-}
-.radio-group {
-  display: flex;
-}
-
-.radio-group,
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 .radio-group label,
