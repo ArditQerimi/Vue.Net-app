@@ -49,7 +49,9 @@ export default {
         categoryId: foundedCategory.id,
         sizeId: foundedSize.id,
         colorIds: foundedColorsIds,
+        // userId:+this.user.UserId
       };
+      debugger
       this.$store.dispatch(`products/${actionType}`, newForm);
     },
 
@@ -105,6 +107,7 @@ export default {
       categories: (state) => state.products.categories,
       colors: (state) => state.products.colors,
       sizes: (state) => state.products.sizes,
+      user: (state) => state.auth.user,
       // loading: (state) => state.loading,
       // error: (state) => state.error,
     }),
@@ -128,6 +131,9 @@ export default {
       console.log(category);
     },
     products(value) {},
+    user(value) {
+      console.log(value)
+    },
     selectedColor(color) {
       console.log(color);
     },
@@ -143,6 +149,7 @@ export default {
 
 <template>
   <div class="form-container">
+    <div>User:{{ this.user &&this.user}}</div>
     <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()">
       <div>
         <v-text-field

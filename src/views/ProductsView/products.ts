@@ -1,4 +1,5 @@
 import axios from "axios";
+import '../../axios/axios'
 
 const state = () => ({
   products: [],
@@ -58,11 +59,14 @@ const actions = {
     } catch (error) {}
   },
   async addProduct({ commit }, payload) {
+    debugger
     try {
       const response = await axios.post(
         `http://localhost:5000/api/Products/CreateOneProduct`,
         payload
       );
+      debugger
+
       commit("setAddedProduct", response.data);
     } catch (error) {}
   },
