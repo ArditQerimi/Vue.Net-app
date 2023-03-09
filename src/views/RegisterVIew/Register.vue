@@ -91,7 +91,6 @@ methods:{
       password: this.password,
       username: this.username,
     };
-    debugger
     this.$store.dispatch(`auth/${actionType}`, newForm);
   },
   async saveUser() {

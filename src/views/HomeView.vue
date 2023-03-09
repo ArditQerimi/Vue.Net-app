@@ -7,26 +7,34 @@ import {mapState} from "vuex";
 export default {
   computed: {
     ...mapState({
-
-      // user: (state) => (state.auth.user),
-      user: (state) => (state.auth.user),
-      // loading: (state) => state.loading,
-      // error: (state) => state.error,
+      user: (state) => state.auth.user,
+      products:(state)=>state.auth.products
     }),
-    watch() {
-      console.log(this.user)
-      console.log('component created');
+  },
+  methods: {
+    async logOut(actionType) {
+      await this.$store.dispatch(`auth/${actionType}`);
     },
-  }
-}
+    async logOutUser() {
+      await this.logOut("logOut");
+    },
+  },
+  created() {
+
+    this.$store.dispatch("auth/fetchProducts");
+  },
+};
 
 </script>
 
 <template>
   <main>
-    <div style="background-color: #fff; height:100vh; display:flex; align-items: center;justify-content: center">
-      Email: {{this.user && this.user.Email}} <br/>
-      UserName: {{this.user && this.user.UserName}}
+    <div style="background-color: #fff; height:100vh; display:flex;flex-direction:column; align-items: center;justify-content: center">
+      <div>Email: {{this.user && this.user.Email}} <br/>
+      UserName: {{this.user && this.user.UserName}} </div>
+      <div>
+      <v-btn color="success" @click="logOutUser()">Logout</v-btn>
+      </div>
 
     </div>
   </main>

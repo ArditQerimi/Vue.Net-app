@@ -1,16 +1,17 @@
-import { createStore, createLogger } from "vuex";
-import products from "@/views/ProductsView/products";
-import auth from "@/views/RegisterVIew/auth";
-// import cart from './modules/cart'
-
-// const debug = process.env.NODE_ENV !== 'production'
+import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
+import products from '@/views/ProductsView/products'
+import auth from '@/views/RegisterVIew/auth'
 
 export default createStore({
   modules: {
-    // cart,
     products,
     auth
   },
-  // strict: debug,
-  // plugins: debug ? [createLogger()] : []
-});
+  plugins: [
+    createPersistedState({
+      key: 'my-app',
+      paths: ['auth.user']
+    })
+  ]
+})

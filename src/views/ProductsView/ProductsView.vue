@@ -46,6 +46,7 @@ export default {
       const foundedColorsIds = foundedColors.map((color) => color.id);
       const newForm = {
         ...this.form,
+        price: +this.form.price,
         categoryId: foundedCategory.id,
         sizeId: foundedSize.id,
         colorIds: foundedColorsIds,

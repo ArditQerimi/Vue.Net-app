@@ -32,7 +32,7 @@ const shopAxios = axios.create({
     headers: {
         "Access-Control-Allow-Credentials" : true,
         "Access-Control-Allow-Origin": "*",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
+        Authorization: "Bearer " + localStorage.getItem("accessToken"),
     },
     validateStatus: (status) => {
         return status == 201 || status == 202 || status == 302 || status == 200;
@@ -40,6 +40,7 @@ const shopAxios = axios.create({
 });
 
 shopAxios.interceptors.response.use(
+
     (response) => response,
     (error) => {
         const status = error.response?.status;
@@ -56,7 +57,8 @@ shopAxios.interceptors.response.use(
         } else {
             return Promise.reject(error);
         }
-    }
+    },
+
 );
 
 export default shopAxios;

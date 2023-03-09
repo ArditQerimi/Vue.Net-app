@@ -5,6 +5,7 @@ import landingPageAxios from "@/axios/LandingPageAxios";
 import router from "@/router";
 // @ts-ignore
 import jwt_decode from "jwt-decode";
+import {instance} from "@/views/ProductsView/products";
 // @ts-ignore
 const state = () => ({
     products: [],
@@ -15,8 +16,8 @@ const state = () => ({
 const actions = {
     async fetchProducts({ commit }) {
         try {
-            const products = await shopAxios.get(
-                "http://localhost:5000/api/Products/getAll"
+            const products = await landingPageAxios.get(
+                "http://localhost:5000/api/Products/getAllProducts"
             );
             commit("setProducts", products.data.reverse());
         } catch (error) {
@@ -29,7 +30,7 @@ const actions = {
     async registerUser({ commit }, payload) {
         try {
             const response = await shopAxios.post(
-                `http://localhost:5000/api/Auth/register`,
+                `/Auth/register`,
                 payload
             );
             commit("setUser", response.data);
@@ -48,12 +49,22 @@ const actions = {
             commit("setLoggedInUser",user);
         } catch (error) {}
     },
+        async logOut({commit}, payload){
+        try {
+            window.location.href = "/login";
+            await router.push('/login')
+            commit("setLogoutUser",);
+        } catch (e) {
+
+        }
+    }
 
 
 };
 
 const mutations = {
     setProducts(state, products) {
+        debugger
         state.products = products;
     },
 
@@ -62,10 +73,14 @@ const mutations = {
         state.user = createdUser;
     },
     setLoggedInUser(state, loggedUser) {
-        debugger;
         state.user = loggedUser;
         localStorage.setItem('user', JSON.stringify(loggedUser));
     },
+    setLogoutUser(state) {
+        state.user = null;
+        localStorage.removeItem('accessToken');
+    },
+
 
 
 };

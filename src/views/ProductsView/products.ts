@@ -1,5 +1,22 @@
+// import '../../axios/axios'
+// import shopAxios from "@/axios/axios";
 import axios from "axios";
-import '../../axios/axios'
+
+
+export const instance = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
+
+instance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem("accessToken"); // or however you retrieve the token
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 const state = () => ({
   products: [],
@@ -12,8 +29,8 @@ const state = () => ({
 const actions = {
   async fetchProducts({ commit }) {
     try {
-      const products = await axios.get(
-        "http://localhost:5000/api/Products/getAll"
+      const products = await instance.get(
+        "/Products/getAll"
       );
       commit("setProducts", products.data.reverse());
     } catch (error) {
@@ -22,8 +39,8 @@ const actions = {
   },
   async fetchCategories({ commit }) {
     try {
-      const categories = await axios.get(
-        "http://localhost:5000/api/Categories/AllCategories"
+      const categories = await instance.get(
+        "/Categories/AllCategories"
       );
       commit("setCategories", categories.data);
     } catch (error) {
@@ -32,7 +49,7 @@ const actions = {
   },
   async fetchSizes({ commit }) {
     try {
-      const sizes = await axios.get("http://localhost:5000/api/Size/AllSizes");
+      const sizes = await instance.get("/Size/AllSizes");
       commit("setSizes", sizes.data);
     } catch (error) {
       console.error(error);
@@ -40,8 +57,8 @@ const actions = {
   },
   async fetchColors({ commit }) {
     try {
-      const colors = await axios.get(
-        "http://localhost:5000/api/Color/AllColors"
+      const colors = await instance.get(
+        "/Color/AllColors"
       );
       commit("setColors", colors.data);
     } catch (error) {
@@ -50,8 +67,8 @@ const actions = {
   },
   async editProduct({ commit }, payload) {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/Products/UpdateProduct`,
+      const response = await instance.put(
+        `/Products/UpdateProduct`,
         payload
       );
       debugger;
@@ -59,11 +76,23 @@ const actions = {
     } catch (error) {}
   },
   async addProduct({ commit }, payload) {
+
+    const newPayload = {
+
+        name: payload.name,
+        price: payload.price,
+        categoryId: payload.categoryId,
+        sizeId: payload.sizeId,
+        colorIds: payload.colorIds
+
+
+    }
+
     debugger
     try {
-      const response = await axios.post(
-        `http://localhost:5000/api/Products/CreateOneProduct`,
-        payload
+      const response = await instance.post(
+        `/Products/CreateOneProduct`,
+          newPayload
       );
       debugger
 
@@ -72,8 +101,8 @@ const actions = {
   },
   async deleteProduct({ commit }, payload) {
     try {
-      const response = await axios.delete(
-        "http://localhost:5000/api/Products/DeleteOneProduct",
+      const response = await instance.delete(
+        "/Products/DeleteOneProduct",
         { data: { id: payload.id } }
       );
 
