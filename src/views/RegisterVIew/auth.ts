@@ -45,14 +45,14 @@ const actions = {
             localStorage.setItem('accessToken', response.data.token);
             const user = jwt_decode(response.data.token) as any;
             console.log(user)
-            await router.push('/admin')
+            await router.push('/home')
             commit("setLoggedInUser",user);
         } catch (error) {}
     },
         async logOut({commit}, payload){
         try {
-            window.location.href = "/login";
-            await router.push('/login')
+            window.location.href = "/home";
+            await router.push('/home')
             commit("setLogoutUser",);
         } catch (e) {
 

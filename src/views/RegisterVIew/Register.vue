@@ -1,4 +1,5 @@
 <template>
+  <router-link to="/home" ><v-btn color="success" >Home</v-btn></router-link>
   <v-card
       class="mx-auto"
       max-width="344"

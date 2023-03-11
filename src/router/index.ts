@@ -7,7 +7,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/login",
+      redirect: "/home",
     },
     {
       path: "/login",
@@ -21,8 +21,8 @@ const router = createRouter({
     },
     {
       path: "/home",
-      name: "home",
-      component: () => import("../views/HomeView.vue"),
+      name: "user-home",
+      component: () => import("../views/User/HomeUIView.vue"),
 
     },
     {
@@ -75,7 +75,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isLoggedIn = !!localStorage.getItem('accessToken');
   if (to.meta.requiresAuth && !isLoggedIn) {
-    next({ path: '/login' });
+    next({ path: '/home' });
   } else if (to.path === '/login' || to.path === '/register') {
     if (isLoggedIn) {
       next({ path: '/admin' });
