@@ -149,9 +149,9 @@ export default {
 </script>
 
 <template>
-  <div class="form-container">
-    <div>User:{{ this.user &&this.user}}</div>
-    <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()">
+  <div class="form-container" v-if="1>2">
+<!--    <div>User:{{ this.user &&this.user}}</div>-->
+    <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()" >
       <div>
         <v-text-field
           label="Name:"

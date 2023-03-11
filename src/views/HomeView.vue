@@ -5,6 +5,7 @@
 import {mapState} from "vuex";
 
 export default {
+  name: "HomeView",
   computed: {
     ...mapState({
       user: (state) => state.auth.user,
