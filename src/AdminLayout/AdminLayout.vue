@@ -19,10 +19,16 @@ export default {
       rail: false,
       navItems: [
         {
-          title: 'Home',
+          title: 'User Home',
+          value: 'home',
+          path: '/home',
+          icon:'mdi-home'
+        },
+        {
+          title: 'Admin Home',
           value: 'home',
           path: '/admin',
-          icon:'mdi-home-city'
+          icon:'mdi-home-account'
         },
         {
           title: 'Products',

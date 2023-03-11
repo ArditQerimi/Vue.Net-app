@@ -1,4 +1,5 @@
 <template>
+  <router-link to="/home" ><v-btn color="success" >Home</v-btn></router-link>
   <v-sheet class="bg-deep-purple pa-12" rounded>
     <v-card class="mx-auto px-6 py-8" max-width="344">
       <v-form
