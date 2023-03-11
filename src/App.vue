@@ -13,7 +13,7 @@ export default {
 </script>
 
 <template>
-  <navbar-view> </navbar-view>
+<!--  <navbar-view> </navbar-view>-->
   <router-view></router-view>
 </template>
 

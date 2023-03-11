@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import store from "@/store";
+import AdminLayout from "@/AdminLayout/AdminLayout.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,47 +23,67 @@ const router = createRouter({
       path: "/home",
       name: "home",
       component: () => import("../views/HomeView.vue"),
+
     },
     {
-      path: "/products",
-      name: "products",
-      component: () => import("../views/ProductsView/ProductsView.vue"),
+      path: '/admin',
+      name: 'admin',
+      component: AdminLayout,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
-      path: "/categories",
-      name: "categories",
-      component: () => import("../views/CategoriesView/CategoriesView.vue"),
+      path: "/admin",
+      name: "admin",
+      component: AdminLayout,
+      meta: {
+        requiresAuth: true,
+      },
+      children: [
+        {
+          path: "/admin",
+          name: "home",
+          component: () => import("../views/HomeView.vue"),
+        },
+        {
+          path: "/admin/products",
+          name: "products",
+          component: () => import("../views/ProductsView/ProductsView.vue"),
+        },
+        {
+          path: "/admin/categories",
+          name: "categories",
+          component: () => import("../views/CategoriesView/CategoriesView.vue"),
+        },
+        {
+          path: "/admin/sizes",
+          name: "sizes",
+          component: () => import("../views/SizesView/ProductSizesView.vue"),
+        },
+        {
+          path: "/admin/colors",
+          name: "colors",
+          component: () => import("../views/ColorsView/ProductColorsView.vue"),
+        },
+      ],
     },
-    {
-      path: "/sizes",
-      name: "sizes",
-      component: () => import("../views/SizesView/ProductSizesView.vue"),
-    },
-    {
-      path: "/colors",
-      name: "colors",
-      component: () => import("../views/ColorsView/ProductColorsView.vue"),
-    },
+
   ],
 });
 
-
-
 router.beforeEach((to, from, next) => {
   const isLoggedIn = !!localStorage.getItem('accessToken');
-  if (to.path === '/login' || to.path === '/register') {
-
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    next({ path: '/login' });
+  } else if (to.path === '/login' || to.path === '/register') {
     if (isLoggedIn) {
-      next({ path: '/home' });
+      next({ path: '/admin' });
     } else {
       next();
     }
   } else {
-    if (!isLoggedIn) {
-      next({ path: '/login' });
-    } else {
-      next();
-    }
+    next();
   }
 });
 

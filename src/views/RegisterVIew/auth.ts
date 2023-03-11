@@ -30,7 +30,7 @@ const actions = {
     async registerUser({ commit }, payload) {
         try {
             const response = await shopAxios.post(
-                `/Auth/register`,
+                `http://localhost:5000/api/Auth/register`,
                 payload
             );
             commit("setUser", response.data);
@@ -45,7 +45,7 @@ const actions = {
             localStorage.setItem('accessToken', response.data.token);
             const user = jwt_decode(response.data.token) as any;
             console.log(user)
-            await router.push('/home')
+            await router.push('/admin')
             commit("setLoggedInUser",user);
         } catch (error) {}
     },
