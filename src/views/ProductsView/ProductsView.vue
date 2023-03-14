@@ -149,7 +149,7 @@ export default {
 </script>
 
 <template>
-  <div class="form-container" v-if="1>2">
+  <div class="form-container" v-if="2>1">
 <!--    <div>User:{{ this.user &&this.user}}</div>-->
     <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()" >
       <div>
