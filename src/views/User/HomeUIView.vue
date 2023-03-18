@@ -43,7 +43,7 @@ export default {
         { name: 'Product 2', price: 20, quantity: 2 },
         { name: 'Product 3', price: 30, quantity: 3 },
       ],
-      showCart: true,
+      showCart: false,
       drawer:true
     }
   },
@@ -151,18 +151,18 @@ export default {
                 </div>
                 <div class="d-flex align-center">
                   <div class="d-flex align-center w-50">
-                <v-btn small class="ml-auto mr-2" size="30" style="width:30px" color="primary" @click="increaseQuantity(index)">
+                <v-btn small class="ml-auto mr-2" size="30" style="width:30px" color="primary" >
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
                 <div class="quantity">{{ item.quantity }}</div>
-                <v-btn small class="ml-2" color="primary" size="30" style="width:30px" :disabled="item.quantity === 1" @click="decreaseQuantity(index)">
+                <v-btn small class="ml-2" color="primary" size="30" style="width:30px" :disabled="item.quantity === 1" >
                   <v-icon>mdi-minus</v-icon>
                 </v-btn>
                   </div>
                   <div class="w-50 d-flex justify-content-between align-center">
                     <div class="total text-center ml-2"> Total: {{ item.price * item.quantity }}</div>
 
-                    <v-btn  small icon size="30" style="width:30px" class="delete-btn" color="error" @click="removeItem(index)">
+                    <v-btn  small icon size="30" style="width:30px" class="delete-btn" color="error" >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </div>
@@ -336,7 +336,6 @@ export default {
                     <v-col v-for="(product, index) in this.products" :key="index" cols="12" sm="12" md="6" lg="4">
 
                       <v-card
-                          :loading="loading"
                           class="mx-auto "
                           max-width="300"
                       >
@@ -384,7 +383,7 @@ export default {
                             ></v-rating>
 
                             <div class="text-grey ms-4">
-                              {{ product.rating }} ({{ product.reviews }} 23 reviews)
+                              {{ product.rating }} ({{  }} 23 reviews)
                             </div>
                           </v-row>
 
@@ -395,7 +394,7 @@ export default {
                           <!--                    <div>{{ product.description }}</div>-->
 
                           <div class="my-1 text-subtitle-2">
-                            Posted by: {{ product.user.userName }}
+                            Posted by: {{ product.user?.userName }}
                           </div>
                         </v-card-text>
 
@@ -405,7 +404,6 @@ export default {
                           <v-btn
                               color="deep-purple-lighten-2"
                               variant="outlined"
-                              @click="addToCart"
 
                           >
                             Add to Cart
@@ -457,37 +455,6 @@ export default {
       </v-main>
     </v-layout>
   </v-card>
-<!--  <v-card>-->
-<!--    <v-layout>-->
-<!--      <v-navigation-drawer-->
-<!--          v-model="drawer"-->
-<!--          temporary-->
-<!--      >-->
-<!--        <v-list-item-->
-<!--            prepend-avatar="https://randomuser.me/api/portraits/men/78.jpg"-->
-<!--            title="John Leider"-->
-<!--        ></v-list-item>-->
-
-<!--        <v-divider></v-divider>-->
-
-<!--        <v-list density="compact" nav>-->
-<!--          <v-list-item prepend-icon="mdi-view-dashboard" title="Home" value="home"></v-list-item>-->
-<!--          <v-list-item prepend-icon="mdi-forum" title="About" value="about"></v-list-item>-->
-<!--        </v-list>-->
-<!--      </v-navigation-drawer>-->
-<!--      <v-main style="height: 250px">-->
-<!--        <div class="d-flex justify-center align-center h-100">-->
-<!--          <v-btn-->
-<!--              color="primary"-->
-<!--              @click.stop="drawer = !drawer"-->
-<!--          >-->
-<!--            Toggle-->
-<!--          </v-btn>-->
-<!--        </div>-->
-<!--      </v-main>-->
-<!--    </v-layout>-->
-<!--  </v-card>-->
-
 
 </template>
 <style>
