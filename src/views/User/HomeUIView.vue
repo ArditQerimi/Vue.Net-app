@@ -61,6 +61,7 @@ export default {
         'mdi-linkedin',
         'mdi-instagram',
       ],
+      value:[0, 100]
     }
   },
 
@@ -207,6 +208,17 @@ hide-delimiter-background
               <v-list>
                 <v-list-item>
                   <v-text-field v-model="searchTerm" label="Search by name" />
+                </v-list-item>
+                <v-list-item>
+                  <v-card>
+                    <v-card-text>
+                      <v-range-slider
+                          v-model="value"
+                          step="1"
+                      ></v-range-slider>
+                      {{value}}
+                    </v-card-text>
+                  </v-card>
                 </v-list-item>
                 <v-list-item>
                   <v-select v-model="selectedCategory" :items="categories" label="Category" />
