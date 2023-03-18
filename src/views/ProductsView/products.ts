@@ -24,9 +24,24 @@ const state = () => ({
   sizes: [],
   colors: [],
   loading: false,
+  modalVisible:false
 });
 
 const actions = {
+  async openModal({commit}) {
+    try {
+      commit('openModal')
+    } catch {
+
+    }
+  },
+  async closeModal({commit}) {
+    try {
+      commit('closeModal')
+    } catch {
+
+    }
+  },
   async fetchProducts({ commit }) {
     try {
       const products = await instance.get(
@@ -112,6 +127,13 @@ const actions = {
 };
 
 const mutations = {
+  openModal(state){
+    state.modalVisible = true;
+    debugger
+  },
+  closeModal(state){
+    state.modalVisible = false
+  },
   setProducts(state, products) {
     state.products = products;
   },
@@ -131,9 +153,11 @@ const mutations = {
     debugger;
 
     state.products[foundedIndex] = updatedProduct;
+    state.modalVisible = false;
   },
   setAddedProduct(state, createdProduct) {
     state.products.unshift(createdProduct);
+    state.modalVisible = false;
   },
   removeProduct(state, deletedProduct) {
     const indexOfProduct = state.products.findIndex(

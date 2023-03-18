@@ -14,6 +14,10 @@ export default {
       type: Function,
       required: true,
     },
+    openModal:{
+      type:Function,
+      required:false
+    },
     message: {
       type: String,
       required: false,
@@ -49,7 +53,7 @@ export default {
     </td>
     <td>
       <div class="d-flex justify-content-start gap-2">
-        <v-btn @click="editItem(item, item.id)">
+        <v-btn @click="editItem(item, item.id),openModal">
           <v-icon icon="mdi-pencil" color="#4CAF50" />
         </v-btn>
         <v-btn @click="deleteItem(item, item.id)">

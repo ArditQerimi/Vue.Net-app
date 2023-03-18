@@ -22,6 +22,7 @@ export default {
       selectedCategory: "",
       selectedColor: '',
       selectedPriceRange:[0,1000],
+      selectedUser:'',
 
       slides: [
           'https://d-themes.com/vue/porto/demo-4/images/home/slider/slide-2.jpg',
@@ -58,37 +59,28 @@ export default {
     categoriesName() {
       return this.categories.map((category) => category.name);
     },
-    filteredProducts() {
-      let filtered = this.products;
-      if (this.searchTerm) {
-        filtered = filtered.filter(product => product.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
-      }
-      if (this.selectedCategory) {
-        filtered = filtered.filter(product => product.category === this.selectedCategory);
-      }
-      if (this.selectedColor) {
-        filtered = filtered.filter(product => product.color === this.selectedColor);
-      }
-      if (this.selectedSize) {
-        filtered = filtered.filter(product => product.size === this.selectedSize);
-      }
-      return filtered;
-    },
+
   },
   methods: {
      async onFilter(){
-
        const filter = {
          name:this.selectedName,
          price:this.selectedPriceRange,
          color:this.selectedColor,
          size:this.selectedSize,
-         category:this.selectedCategory
-
+         category:this.selectedCategory,
+         user: this.selectedUser,
        }
-       debugger
        await this.$store.dispatch('auth/filterProducts', filter)
      },
+    async onClear() {
+      this.selectedName='';
+          this.selectedSize= "";
+          this.selectedCategory= "";
+          this.selectedColor= '';
+          this.selectedPriceRange=[0,1000];
+          this.selectedUser='';
+    },
     async logOut(actionType) {
       await this.$store.dispatch(`auth/${actionType}`);
     },
@@ -101,7 +93,6 @@ export default {
 
   },
   created() {
-    // this.$store.dispatch("auth/fetchProducts");
     this.$store.dispatch("auth/filterProducts",{});
     this.$store.dispatch("products/fetchCategories");
     this.$store.dispatch("products/fetchSizes");
@@ -204,50 +195,130 @@ hide-delimiter-background
             <v-sidebar v-model="sidebar" app>
               <v-list>
                 <v-list-item>
-                  <v-text-field v-model="selectedName" label="Search by name" />
+                  <v-text-field v-model="selectedName" label="Search by name" density="comfortable" hide-details/>
                 </v-list-item>
                 <v-list-item>
-                  <v-card>
-                    <v-card-text>
+                  <v-text-field v-model="selectedUser" label="Search by UserName" density="comfortable" hide-details />
+                </v-list-item>
+                <v-list-item>
+                  <v-card style="paddingTop: 15px">
+                    <v-card-text >
                       <v-range-slider
                           v-model="selectedPriceRange"
                           :min="0"
                           :max="1000"
                           :step="10"
+                          density="comfortable"
+                          label="Price"
+                          thumb-label="always"
+                          hide-details
+                          style="
+                                 .v-slider__thumb-label {
+                                    font-size: 16px;
+                                  }
+                                "
+
                       ></v-range-slider>
-                      {{selectedPriceRange}}
                     </v-card-text>
                   </v-card>
                 </v-list-item>
                 <v-list-item>
 
-                  <v-select v-model="selectedCategory" :items="categoriesName" label="Category" />
+                  <v-select v-model="selectedCategory" :items="categoriesName" label="Category" density="comfortable" hide-details/>
                 </v-list-item>
                 <v-list-item>
-                  <v-select v-model="selectedColor" :items="colorsName" label="Color" />
+                  <v-select v-model="selectedColor" :items="colorsName" label="Color" density="comfortable" hide-details/>
                 </v-list-item>
                 <v-list-item>
-                  <v-select v-model="selectedSize" :items="sizesName" label="Size" />
+                  <v-select v-model="selectedSize" :items="sizesName" label="Size" density="comfortable" hide-details/>
                 </v-list-item>
 
               </v-list>
-              <v-btn width="100%" style="cursor:pointer" @click="this.onFilter">Submit</v-btn>
+              <v-btn width="100%" style="cursor:pointer; margin-bottom:6px" color="light-green" dark @click="this.onFilter">Filter</v-btn>
+              <v-btn width="100%" style="cursor:pointer" color="orange lighten-2" dark @click="this.onClear">Clear</v-btn>
+
             </v-sidebar>
           </v-col>
           <v-col cols="12" sm="6" md="9">
             <v-row>
               <v-col v-for="(product, index) in this.products" :key="index" cols="12" sm="12" md="6" lg="4">
-                <v-card>
-                  <v-img src='https://mahadevfastfoodvns.websites.co.in/twenty-seventeen/img/product-placeholder.png' height="200"></v-img>
-                  <v-card-title>{{ product.name }}</v-card-title>
-                  <v-card-text>
-                    <p>Category: {{ product.category.name }}</p>
-                    <p>Color: <span v-for="color in product.colors">
-                   <span style="margin-right: 2px">{{color.name}}</span>
-                  </span></p>
-                    <p>Size: {{ product.size.name }}</p>
-                    <p>User: {{ product.userId }}</p>
+
+                <v-card
+                    :loading="loading"
+                    class="mx-auto "
+                    max-width="300"
+                >
+                  <template v-slot:loader="{ isActive }">
+                    <v-progress-linear
+                        :active="isActive"
+                        color="deep-purple"
+                        height="4"
+                        indeterminate
+                    ></v-progress-linear>
+                  </template>
+
+                  <v-img
+                      cover
+                      height="200"
+                      src="https://mahadevfastfoodvns.websites.co.in/twenty-seventeen/img/product-placeholder.png"
+                  ></v-img>
+
+                  <v-card-item>
+                    <v-card-title>{{ product.name }}</v-card-title>
+
+                    <v-card-subtitle>
+                      <span class="me-1">{{ product.category.name }}</span>
+
+                      <v-icon
+                          color="error"
+                          icon="mdi-fire-circle"
+                          size="small"
+                      ></v-icon>
+                    </v-card-subtitle>
+                  </v-card-item>
+
+                  <v-card-text class="m-0 pb-0">
+                    <v-row
+                        align="center"
+                        class="mx-0"
+                    >
+                      <v-rating
+                          :model-value="product.rating"
+                          color="amber"
+                          density="compact"
+                          half-increments
+                          readonly
+                          size="small"
+                      ></v-rating>
+
+                      <div class="text-grey ms-4">
+                        {{ product.rating }} ({{ product.reviews }} 23 reviews)
+                      </div>
+                    </v-row>
+
+                    <div class="mt-3 text-subtitle-1">
+                      {{ product.price }}€ • {{ product.size.name }}
+                    </div>
+
+<!--                    <div>{{ product.description }}</div>-->
+
+                    <div class="my-1 text-subtitle-2">
+                      Posted by: {{ product.user.userName }}
+                    </div>
                   </v-card-text>
+
+                  <v-divider class="mx-4 mb-1"></v-divider>
+
+                  <v-card-actions class="justify-content-end">
+                    <v-btn
+                        color="deep-purple-lighten-2"
+                        variant="outlined"
+                        @click="addToCart"
+
+                    >
+                      Add to Cart
+                    </v-btn>
+                  </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>

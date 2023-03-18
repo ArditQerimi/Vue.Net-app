@@ -24,6 +24,8 @@ export default {
       selectedCategory: "",
       selectedColors: [],
       inline: null,
+      dialog: false,
+      // modalVisible: false
     };
   },
   created() {
@@ -33,6 +35,12 @@ export default {
     this.$store.dispatch("products/fetchSizes");
   },
   methods: {
+    // openModal() {
+    //   this.modalVisible = true;
+    // },
+    // closeModal() {
+    //   this.modalVisible = false;
+    // },
     async saveProduct(actionType) {
       const foundedCategory = this.categories.find(
         (category) => category.name === this.selectedCategory
@@ -63,7 +71,15 @@ export default {
       await this.saveProduct("editProduct");
     },
 
+    openModal() {
+      this.$store.dispatch('products/openModal')
+    },
+    closeModal() {
+      this.$store.dispatch('products/closeModal')
+    },
+
     editProduct(item) {
+      this.openModal()
       const { name, price, colors, size, category } = item ?? {};
       const colorIds = colors?.map((color) => color?.id) ?? [];
       const colorNames = colors?.map((color) => color?.name) ?? [];
@@ -109,13 +125,10 @@ export default {
       colors: (state) => state.products.colors,
       sizes: (state) => state.products.sizes,
       user: (state) => state.auth.user,
+      modalVisible:(state) => state.products.modalVisible
       // loading: (state) => state.loading,
       // error: (state) => state.error,
     }),
-    // ...mapGetters("products", {
-    //   products: "cartProducts",
-    //   price: "cartTotalPrice",
-    // }),
     sizesName() {
       return this.sizes.map((size) => size.name);
     },
@@ -126,7 +139,14 @@ export default {
       return this.categories.map((category) => category.name);
     },
   },
+
+
   watch: {
+    modalVisible(newValue) {
+      if (newValue == false) {
+        this.clearForm();
+      }
+    },
     selectedSizeType(size) {},
     selectedCategory(category) {
       console.log(category);
@@ -149,77 +169,104 @@ export default {
 </script>
 
 <template>
-  <div class="form-container" v-if="2>1">
-<!--    <div>User:{{ this.user &&this.user}}</div>-->
-    <form @submit.prevent="!this.form.id ? saveAdd() : saveEdit()" >
-      <div>
-        <v-text-field
-          label="Name:"
-          v-model="form.name"
-          @change="logInput"
-          type="text"
-          variant="solo"
-          density="comfortable"
-          direction="horizontal"
-        ></v-text-field>
-      </div>
-      <div>
-        <v-text-field
-          label="Price:"
-          v-model="form.price"
-          type="number"
-          step="0.01"
-          variant="solo"
-          density="comfortable"
-        ></v-text-field>
-      </div>
+  <v-row justify="center">
+      <v-btn
+          color="primary"
+          @click="openModal"
+      >
+        Add product
+      </v-btn>
+    <v-dialog
+        v-model="this.modalVisible"
+        persistent
+        width="400"
+    >
 
-      <div>
-        <v-select
-          label="Category:"
-          :items="this.categoriesName"
-          variant="solo"
-          v-model="selectedCategory"
-          density="comfortable"
-          onchange="category"
-        ></v-select>
-      </div>
-      <div>
-        <v-select
-          label="Size:"
-          :items="this.sizesName"
-          variant="solo"
-          v-model="selectedSizeType"
-          density="comfortable"
-        ></v-select>
-      </div>
+      <v-card >
+        <v-card-title class="text-h5">
+          Add new product
+        </v-card-title>
+        <v-card-text>
+          <div>
+            <v-text-field
+                label="Name:"
+                v-model="form.name"
+                @change="logInput"
+                type="text"
+                variant="solo"
+                density="comfortable"
+                direction="horizontal"
+            ></v-text-field>
+          </div>
+          <div>
+            <v-text-field
+                label="Price:"
+                v-model="form.price"
+                type="number"
+                step="0.01"
+                variant="solo"
+                density="comfortable"
+            ></v-text-field>
+          </div>
 
-      <div>
-        <v-autocomplete
-          label="Colors:"
-          :items="this.colorsName"
-          multiple
-          variant="solo"
-          v-model="selectedColors"
-          density="comfortable"
-        ></v-autocomplete>
-      </div>
+          <div>
+            <v-select
+                label="Category:"
+                :items="this.categoriesName"
+                variant="solo"
+                v-model="selectedCategory"
+                density="comfortable"
+                onchange="category"
+            ></v-select>
+          </div>
+          <div>
+            <v-select
+                label="Size:"
+                :items="this.sizesName"
+                variant="solo"
+                v-model="selectedSizeType"
+                density="comfortable"
+            ></v-select>
+          </div>
 
-      <div style="display: flex; justify-content: flex-end">
-        <button v-if="this.form.id" class="submit-btn" type="submit">
-          Save Edit
-        </button>
-        <button v-if="!this.form.id" class="submit-btn" type="submit">
-          Save Product
-        </button>
-      </div>
-    </form>
-  </div>
+          <div>
+            <v-autocomplete
+                label="Colors:"
+                :items="this.colorsName"
+                multiple
+                variant="solo"
+                v-model="selectedColors"
+                density="comfortable"
+            ></v-autocomplete>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+              color="green-darken-1"
+              variant="text"
+              @click="closeModal"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn v-if="this.form.id"  color="green-darken-1"  @click=" saveEdit" variant="text">
+            Save Edit
+          </v-btn>
+          <v-btn v-if="!this.form.id" color="green-darken-1"  @click="saveAdd" variant="text">
+            Save Product
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
+
 
   <v-container fluid class="spacing-playground pa-6 justify-center">
     <TableComponent
       :delete-item="deleteProduct"
       :edit-item="editProduct"
+      :open-modal="openModal"
       :headers="['Category', 'Product', 'Price', 'Colors', 'Size', 'Actions']"
       :tableRows="ProductsTableRow"
       :items="products"
