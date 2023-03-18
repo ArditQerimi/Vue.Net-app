@@ -17,58 +17,47 @@ export default {
         { title: 'Click Me 2' },
       ],
       search: '',
-      // user: {
-      //   name: 'John Doe',
-      //   email: 'johndoe@example.com',
-      //   avatarUrl: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-      // },
-      // user:null,
+      selectedName:'',
+      selectedSize: "",
+      selectedCategory: "",
+      selectedColor: '',
+      selectedPriceRange:[0,1000],
 
-      colors: [
-        'indigo',
-        'warning',
-        'pink darken-2',
-        'red lighten-1',
-        'deep-purple accent-4',
-      ],
       slides: [
           'https://d-themes.com/vue/porto/demo-4/images/home/slider/slide-2.jpg',
           'https://static.vecteezy.com/system/resources/previews/002/294/859/original/flash-sale-web-banner-design-e-commerce-online-shopping-header-or-footer-banner-free-vector.jpg'
-        // 'First',
-        // 'Second',
-        // 'Third',
-        // 'Fourth',
-        // 'Fifth',
       ],
       sidebar: true,
       searchTerm: '',
-      selectedCategory: '',
-      selectedColor: '',
-      selectedSize: '',
-      products2: [
-        { name: 'Product A', category: 'Category 1', color: 'Red', size: 'Small', image: 'https://source.unsplash.com/500x500/?product,red' },
-        { name: 'Product B', category: 'Category 1', color: 'Blue', size: 'Medium', image: 'https://source.unsplash.com/500x500/?product,blue' },
-        { name: 'Product C', category: 'Category 2', color: 'Green', size: 'Large', image: 'https://source.unsplash.com/500x500/?product,green' },
-        { name: 'Product D', category: 'Category 3', color: 'Yellow', size: 'Small', image: 'https://source.unsplash.com/500x500/?product,yellow' },
-        { name: 'Product E', category: 'Category 3', color: 'Pink', size: 'Medium', image: 'https://source.unsplash.com/500x500/?product,pink' },
-      ],
-      categories: ['Category 1', 'Category 2', 'Category 3'],
-      colors2: ['Red', 'Blue', 'Green', 'Yellow'],
-      sizes: ['Small', 'Medium', 'Large'],
+
       icons: [
         'mdi-facebook',
         'mdi-twitter',
         'mdi-linkedin',
         'mdi-instagram',
       ],
+      value:[0, 1000]
     }
   },
 
   computed: {
     ...mapState({
       user: (state) => state.auth.user,
-      products:(state)=>state.auth.products
+      products:(state)=>state.auth.products,
+      categories:(state)=> state.products.categories,
+      sizes:(state)=> state.products.sizes,
+      colors:(state)=> state.products.colors,
     }),
+
+    sizesName() {
+      return this.sizes.map((size) => size.name);
+    },
+    colorsName() {
+      return this.colors.map((color) => color.name);
+    },
+    categoriesName() {
+      return this.categories.map((category) => category.name);
+    },
     filteredProducts() {
       let filtered = this.products;
       if (this.searchTerm) {
@@ -87,18 +76,24 @@ export default {
     },
   },
   methods: {
-    push() {
-      return push
-    },
+     async onFilter(){
 
+       const filter = {
+         name:this.selectedName,
+         price:this.selectedPriceRange,
+         color:this.selectedColor,
+         size:this.selectedSize,
+         category:this.selectedCategory
+
+       }
+       debugger
+       await this.$store.dispatch('auth/filterProducts', filter)
+     },
     async logOut(actionType) {
       await this.$store.dispatch(`auth/${actionType}`);
     },
     async logOutUser() {
       await this.logOut("logOut");
-    },
-    logout() {
-      // Your logout logic here
     },
     toAdmin(){
       window.location.href = '/admin'
@@ -106,8 +101,11 @@ export default {
 
   },
   created() {
-
-    this.$store.dispatch("auth/fetchProducts");
+    // this.$store.dispatch("auth/fetchProducts");
+    this.$store.dispatch("auth/filterProducts",{});
+    this.$store.dispatch("products/fetchCategories");
+    this.$store.dispatch("products/fetchSizes");
+    this.$store.dispatch("products/fetchColors");
   },
 };
 
@@ -206,23 +204,39 @@ hide-delimiter-background
             <v-sidebar v-model="sidebar" app>
               <v-list>
                 <v-list-item>
-                  <v-text-field v-model="searchTerm" label="Search by name" />
+                  <v-text-field v-model="selectedName" label="Search by name" />
                 </v-list-item>
                 <v-list-item>
-                  <v-select v-model="selectedCategory" :items="categories" label="Category" />
+                  <v-card>
+                    <v-card-text>
+                      <v-range-slider
+                          v-model="selectedPriceRange"
+                          :min="0"
+                          :max="1000"
+                          :step="10"
+                      ></v-range-slider>
+                      {{selectedPriceRange}}
+                    </v-card-text>
+                  </v-card>
                 </v-list-item>
                 <v-list-item>
-                  <v-select v-model="selectedColor" :items="colors" label="Color" />
+
+                  <v-select v-model="selectedCategory" :items="categoriesName" label="Category" />
                 </v-list-item>
                 <v-list-item>
-                  <v-select v-model="selectedSize" :items="sizes" label="Size" />
+                  <v-select v-model="selectedColor" :items="colorsName" label="Color" />
                 </v-list-item>
+                <v-list-item>
+                  <v-select v-model="selectedSize" :items="sizesName" label="Size" />
+                </v-list-item>
+
               </v-list>
+              <v-btn width="100%" style="cursor:pointer" @click="this.onFilter">Submit</v-btn>
             </v-sidebar>
           </v-col>
           <v-col cols="12" sm="6" md="9">
             <v-row>
-              <v-col v-for="(product, index) in filteredProducts" :key="index" cols="12" sm="12" md="6" lg="4">
+              <v-col v-for="(product, index) in this.products" :key="index" cols="12" sm="12" md="6" lg="4">
                 <v-card>
                   <v-img src='https://mahadevfastfoodvns.websites.co.in/twenty-seventeen/img/product-placeholder.png' height="200"></v-img>
                   <v-card-title>{{ product.name }}</v-card-title>
@@ -231,7 +245,7 @@ hide-delimiter-background
                     <p>Color: <span v-for="color in product.colors">
                    <span style="margin-right: 2px">{{color.name}}</span>
                   </span></p>
-                    <p>Size: {{ product.size.test }}</p>
+                    <p>Size: {{ product.size.name }}</p>
                     <p>User: {{ product.userId }}</p>
                   </v-card-text>
                 </v-card>

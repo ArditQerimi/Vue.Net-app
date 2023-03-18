@@ -1,65 +1,54 @@
-<!--<template>-->
-<!--  <div>-->
-<!--    <label for="email">Email</label>-->
-<!--    <input type="email" id="email" name="email" v-model="email" :class="getInputClass(emailError)" @change="handleEmailChange" @blur="handleEmailBlur" />-->
-<!--    <span>{{ getErrorMessage(emailError) }}</span>-->
 
-<!--    <label for="password">Password</label>-->
-<!--    <input type="password" id="password" name="password" v-model="password" :class="getInputClass(passwordError)" @change="handlePasswordChange" @blur="handlePasswordBlur" />-->
-<!--    <span>{{ getErrorMessage(passwordError) }}</span>-->
-
-<!--    <button @click="handleSubmit">Submit</button>-->
-<!--  </div>-->
-<!--</template>-->
 <template>
-  <v-container style="padding:40px 0; height:100vh" class="d-flex align-center justify-center ">
-    <v-card style="width: 100%; height:100%; ">
-      <v-row style="width: 100%; height:100%">
-        <v-col cols="12" md="6">
-          <img style="width: 100%; height: 100%; object-fit: cover;" :src="randomPhotoUrl" alt="Random photo">
+    <v-container fluid class="p-0 m-0">
+      <v-row class="vh-100 p-0 m-0 ">
+        <v-col cols="12" sm="7" id="image-col" class="d-flex align-center justify-center h-100 p-0 " >
+          <img :src="randomPhotoUrl"  style="height: 100%; width: 100%; object-fit: cover" alt="background">
         </v-col>
-        <v-col cols="12" md="6" class="d-flex align-center justify-center ">
-          <div style="width: 100%">
-            <v-card-title class="text-center">Login</v-card-title>
-            <v-card-text>
-              <v-form>
-                <v-text-field
-                    v-model="email"
-                    :class="getInputClass(emailError)"
-                    :error-messages="getErrorMessage(emailError)"
-                    @input="handleEmailChange"
-                    @blur="handleEmailBlur"
-                    label="Email"
-                    type="email"
-                    required
-                ></v-text-field>
+        <v-col cols="12" sm="5"  class="d-flex align-center justify-center ">
+            <v-card class="w-100 py-2 px-2">
+              <v-card-title class="text-center">Login</v-card-title>
+              <v-card-text>
+                <v-form>
+                  <v-text-field
+                      v-model="email"
+                      :class="getInputClass(emailError)"
+                      :error-messages="getErrorMessage(emailError)"
+                      @input="handleEmailChange"
+                      @blur="handleEmailBlur"
+                      label="Email"
+                      type="email"
+                      required
+                  ></v-text-field>
 
-                <v-text-field
-                    v-model="password"
-                    :class="getInputClass(passwordError)"
-                    :error-messages="getErrorMessage(passwordError)"
-                    @input="handlePasswordChange"
-                    @blur="handlePasswordBlur"
-                    label="Password"
-                    type="password"
-                    required
-                ></v-text-field>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" @click="handleSubmit">Submit</v-btn>
-            </v-card-actions>
-          </div>
+                  <v-text-field
+                      v-model="password"
+                      :class="getInputClass(passwordError)"
+                      :error-messages="getErrorMessage(passwordError)"
+                      @input="handlePasswordChange"
+                      @blur="handlePasswordBlur"
+                      label="Password"
+                      type="password"
+                      required
+                  ></v-text-field>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" @click="handleSubmit">Submit</v-btn>
+              </v-card-actions>
+</v-card>
         </v-col>
       </v-row>
-    </v-card>
-  </v-container>
+
+    </v-container>
+
 
 </template>
 
 <script>
 import {mapState} from "vuex";
+
 
 export default {
   data: () => ({
@@ -169,3 +158,12 @@ export default {
   },
 }
 </script>
+<style>
+@media screen and (max-width:600px) {
+  #image-col {
+    order: 2
+  }
+}
+
+
+</style>
