@@ -37,6 +37,10 @@
                 <v-spacer></v-spacer>
                 <v-btn color="primary" @click="handleSubmit">Submit</v-btn>
               </v-card-actions>
+              <div style="display:flex; justify-content:center; flex-direction: column; align-items: center; gap: 1px; margin:10px 0; font-size:16px">
+                <p class="m-0">Don't you have an account? <router-link to="/register">Register now</router-link></p>
+                <p class="m-0">Or, go to <router-link to="/home">Home</router-link></p>
+              </div>
 </v-card>
         </v-col>
       </v-row>
