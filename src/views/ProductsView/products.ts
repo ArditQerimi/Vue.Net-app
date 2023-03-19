@@ -103,13 +103,11 @@ const actions = {
 
     }
 
-    debugger
     try {
       const response = await instance.post(
         `/Products/CreateOneProduct`,
           newPayload
       );
-      debugger
 
       commit("setAddedProduct", response.data);
     } catch (error) {}
@@ -129,7 +127,6 @@ const actions = {
 const mutations = {
   openModal(state){
     state.modalVisible = true;
-    debugger
   },
   closeModal(state){
     state.modalVisible = false
@@ -150,7 +147,6 @@ const mutations = {
     const foundedIndex = state.products.findIndex(
       (p) => p.id === updatedProduct.id
     );
-    debugger;
 
     state.products[foundedIndex] = updatedProduct;
     state.modalVisible = false;

@@ -26,13 +26,11 @@ const actions = {
     },
 
     async filterProducts({ commit }, payload) {
-        debugger
         try {
             const response = await landingPageAxios.post(
                 `http://localhost:5000/api/Products/Filter`,
                 payload
             );
-            debugger
             commit("setFilter", response.data);
         } catch (error) {}
     },

@@ -1,8 +1,7 @@
 <script >
 
 
-
-import {mapState} from "vuex";
+import {mapActions, mapGetters, mapState} from "vuex";
 import login from "@/views/RegisterVIew/Login.vue";
 import router from "@/router";
 
@@ -10,12 +9,6 @@ export default {
   name: "HomeUIView",
   data () {
     return {
-      items: [
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me' },
-        { title: 'Click Me 2' },
-      ],
       search: '',
       selectedName:'',
       selectedSize: "",
@@ -44,7 +37,8 @@ export default {
         { name: 'Product 3', price: 30, quantity: 3 },
       ],
       showCart: false,
-      drawer:true
+      drawer:true,
+      totalPrice:null
     }
   },
 
@@ -55,8 +49,9 @@ export default {
       categories:(state)=> state.products.categories,
       sizes:(state)=> state.products.sizes,
       colors:(state)=> state.products.colors,
+      items: state => state.cart.items
     }),
-
+    ...mapGetters("cart", ["cartItems"]),
     sizesName() {
       return this.sizes.map((size) => size.name);
     },
@@ -66,25 +61,53 @@ export default {
     categoriesName() {
       return this.categories.map((category) => category.name);
     },
-    cartTotal() {
-      return this.cart.reduce((total, item) => {
-        return total + item.price * item.quantity;
-      }, 0);
-    },
+    cartTotal(){
+      let totalPrice = 0;
+      for (let i = 0; i < this.items.length; i++) {
+        totalPrice += this.items[i].total;
+      }
+      return totalPrice
+    }
 
   },
   methods: {
-    increment(item) {
-      item.quantity++;
+    ...mapActions("cart", ["addItemToCart",
+      "incrementCartItemQuantity",
+      "decrementCartItemQuantity",
+        "removeCartItem",
+        "clearCart"
+
+    ]),
+    isItemInCart(productId){
+      const foundedItem = this.items?.findIndex((item)=> item.product.id === productId);
+      return foundedItem > -1
     },
-    decrement(item) {
-      if (item.quantity > 1) {
-        item.quantity--;
+    addToCart(productId) {
+      const foundedItem = this.items?.findIndex((item)=> item.product.id === productId)
+      const isInCart = foundedItem > -1
+      if(!isInCart) {
+        this.addItemToCart({ productId: productId });
       }
+    },
+    incrementQuantity(itemId) {
+      this.incrementCartItemQuantity({ itemId: itemId });
+      this.$store.dispatch("cart/fetchCartItems");
+    },
+    decrementQuantity(itemId) {
+      this.decrementCartItemQuantity({ itemId: itemId });
+      this.$store.dispatch("cart/fetchCartItems");
+    },
+    clearCartItems() {
+      this.clearCart();
+    },
+    removeItem(itemId){
+      const itemToRemove = {
+        itemId: itemId
+      }
+      this.removeCartItem(itemToRemove)
     },
     toggleCart(){
       this.showCart = !this.showCart
-      debugger
     },
      async onFilter(){
        const filter = {
@@ -98,12 +121,13 @@ export default {
        await this.$store.dispatch('auth/filterProducts', filter)
      },
     async onClear() {
-      this.selectedName='';
+          this.selectedName='';
           this.selectedSize= "";
           this.selectedCategory= "";
           this.selectedColor= '';
           this.selectedPriceRange=[0,1000];
           this.selectedUser='';
+          await this.$store.dispatch('auth/filterProducts', {})
     },
     async logOut(actionType) {
       await this.$store.dispatch(`auth/${actionType}`);
@@ -116,12 +140,17 @@ export default {
     }
 
   },
+
+
   created() {
     this.$store.dispatch("auth/filterProducts",{});
     this.$store.dispatch("products/fetchCategories");
     this.$store.dispatch("products/fetchSizes");
     this.$store.dispatch("products/fetchColors");
+    this.$store.dispatch("cart/fetchCartItems");
+
   },
+
 };
 
 
@@ -139,30 +168,32 @@ export default {
 <v-banner-text class="p-2 text-center font-weight-bold text-h6">Shopping cart</v-banner-text>
         <v-list class="p-2">
           <v-list-item-group>
-            <v-card v-for="(item, index) in cart" :key="item.id" class="mb-3" elevation="2">
+            <v-card v-for="(item, index) in cartItems" :key="item.id" class="mb-3" elevation="2">
             <v-list-item >
               <div  class="d-flex flex-column gap-2">
                 <div class="d-flex align-center">
                   <img style='height:50px; width:50px' src="https://mahadevfastfoodvns.websites.co.in/twenty-seventeen/img/product-placeholder.png" />
                   <div class="d-flex flex-column pl-2">
-                    <v-list-item-title class="text-body-1 font-weight-medium">{{ item.name }}</v-list-item-title>
-                    <v-list-item-subtitle class="text-body-3">Price: {{ item.price }}</v-list-item-subtitle>
+                    <v-list-item-title class="text-body-1 font-weight-medium">{{ item?.product?.name }}</v-list-item-title>
+                    <v-list-item-subtitle class="text-body-3">Price: {{ item?.product?.price }}</v-list-item-subtitle>
                   </div>
                 </div>
                 <div class="d-flex align-center">
                   <div class="d-flex align-center w-50">
-                <v-btn small class="ml-auto mr-2" size="30" style="width:30px" color="primary" >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-                <div class="quantity">{{ item.quantity }}</div>
-                <v-btn small class="ml-2" color="primary" size="30" style="width:30px" :disabled="item.quantity === 1" >
+
+                <v-btn small class="ml-2" color="primary" size="30" style="width:30px" :disabled="item.quantity === 1" @click="decrementQuantity(item.id)">
                   <v-icon>mdi-minus</v-icon>
                 </v-btn>
+                    <div class="quantity">{{ item?.quantity }}</div>
+
+                    <v-btn small class="ml-auto mr-2" size="30" style="width:30px" color="primary" @click="incrementQuantity(item.id)" >
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
                   </div>
                   <div class="w-50 d-flex justify-content-between align-center">
-                    <div class="total text-center ml-2"> Total: {{ item.price * item.quantity }}</div>
+                    <div class="total text-center ml-2"> Total: {{ item?.total }}</div>
 
-                    <v-btn  small icon size="30" style="width:30px" class="delete-btn" color="error" >
+                    <v-btn  small icon size="30" style="width:30px" class="delete-btn" color="error" @click="removeItem(item.id)" >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </div>
@@ -176,7 +207,7 @@ export default {
           <v-divider></v-divider>
           <div class="d-flex justify-space-between align-center mt-2 total-container">
             <div class="text-body-2 font-weight-medium">Total:</div>
-            <div class="total">{{ getTotal }}</div>
+            <div class="total">{{ cartTotal }}</div>
           </div>
         </v-list>
 
@@ -208,7 +239,7 @@ export default {
                 <v-icon>mdi-magnify</v-icon>
               </v-btn>
               <v-btn icon @click="toggleCart">
-                <v-badge content="9+" color="error">
+                <v-badge :content="Number(items?.length)" color="error">
                   <v-icon>mdi-cart-outline</v-icon>
                 </v-badge>
 
@@ -404,10 +435,13 @@ export default {
                           <v-btn
                               color="deep-purple-lighten-2"
                               variant="outlined"
-
+                              @click="addToCart(product.id)"
+                              :disabled="isItemInCart(product.id)"
+                              :hidden="product?.user?.id == user?.UserId"
                           >
-                            Add to Cart
+                          {{isItemInCart(product.id) ? 'In Cart' : 'Add to Cart'}}
                           </v-btn>
+                          <v-card-subtitle :hidden="product?.user?.id != user?.UserId">{{'Your product'}}</v-card-subtitle>
                         </v-card-actions>
                       </v-card>
                     </v-col>
