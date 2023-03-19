@@ -41,7 +41,11 @@ const actions = {
                 `http://localhost:5000/api/Auth/register`,
                 payload
             );
-            commit("setUser", response.data);
+            localStorage.setItem('accessToken', response.data.token);
+            const user = jwt_decode(response.data.token) as any;
+            await router.push('/home')
+            commit("setUser", user);
+
         } catch (error) {}
     },
     async loginUser({ commit }, payload) {
