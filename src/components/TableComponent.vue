@@ -14,7 +14,10 @@ export default {
       type: Array,
       required: true,
     },
-
+    openModal:{
+      type:Function,
+      required:false
+    },
     editItem: {
       type: Function,
       required: true,
@@ -52,6 +55,7 @@ export default {
         :items="items"
         :delete-item="deleteItem"
         :edit-item="editItem"
+        :open-modal="openModal"
       />
     </tbody>
   </v-table>
